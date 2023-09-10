@@ -1,9 +1,8 @@
-package openai
+package pinecone
 
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -17,23 +16,24 @@ const (
 
 // Client - Pinecone client.
 type Client struct {
-	BaseURL        *url.URL
+	BaseUrl     string
 	Environment string
-	HTTPClient     *http.Client
+	HTTPClient  *http.Client
 
 	apiKey string
-	userAgent      string
+
+	userAgent string
 }
 
 // NewClient - creates new Pinecone client.
 func NewClient(apiKey string, environment string) *Client {
 	c := &Client{
-		HTTPClient: &http.Client{Timeout: 30 * time.Second},
+		HTTPClient:  &http.Client{Timeout: 30 * time.Second},
 		Environment: environment,
-		apiKey:  apiKey,
-		userAgent:  "skyscrapr/pinecone-sdk-go",
+		BaseUrl:     apiTemplateUrl,
+		apiKey:      apiKey,
+		userAgent:   "skyscrapr/pinecone-sdk-go",
 	}
-	c.BaseURL, _ = url.Parse(fmt.Sprintf(apiTemplateUrl, environment))
 	return c
 }
 
@@ -84,7 +84,7 @@ func (c *Client) doRequest(req *http.Request, v any) error {
 	defer res.Body.Close()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return c.handleErrorResp(res)
+		return c.handleHTTPErrorResp(res)
 	}
 
 	return decodeResponse(res.Body, v)
@@ -99,22 +99,4 @@ func decodeResponse(body io.Reader, v any) error {
 		log.Fatal(err)
 	}
 	return nil
-}
-
-func (c *Client) handleErrorResp(resp *http.Response) error {
-	var errRes ErrorResponse
-	err := json.NewDecoder(resp.Body).Decode(&errRes)
-	if err != nil || errRes.Error == nil {
-		reqErr := &RequestError{
-			HTTPStatusCode: resp.StatusCode,
-			Err:            err,
-		}
-		if errRes.Error != nil {
-			reqErr.Err = errRes.Error
-		}
-		return reqErr
-	}
-
-	errRes.Error.HTTPStatusCode = resp.StatusCode
-	return errRes.Error
 }

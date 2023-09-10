@@ -1,8 +1,6 @@
-package openai
+package pinecone
 
-import (
-
-)
+import ()
 
 const DatabasesEndpointPath = "/databases/"
 

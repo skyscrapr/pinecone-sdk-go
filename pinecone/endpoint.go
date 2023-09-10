@@ -1,13 +1,10 @@
-package openai
+package pinecone
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"path"
-)
-
-const (
-	apiPath = "v1"
 )
 
 type endpointI interface {
@@ -34,10 +31,17 @@ func (e *endpoint) buildURL(endpointPath string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
+	sBaseUrl := e.BaseUrl
+	if e.Environment != "" {
+		sBaseUrl = fmt.Sprintf(apiTemplateUrl, e.Environment)
+	}
+	baseUrl, err := url.Parse(sBaseUrl)
+	if err != nil {
+		return nil, err
+	}
 	u.Path = path.Join(e.EndpointPath, u.Path)
-	u.Path = path.Join(apiPath, u.Path)
-	u.Path = path.Join(e.BaseURL.Path, u.Path)
-	return e.BaseURL.ResolveReference(u), err
+	u.Path = path.Join(baseUrl.Path, u.Path)
+	return baseUrl.ResolveReference(u), err
 }
 
 func (e *endpoint) doRequest(req *http.Request, v any) error {

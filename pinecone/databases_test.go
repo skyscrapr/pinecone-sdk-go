@@ -1,4 +1,4 @@
-package openai_test
+package pinecone_test
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 
 func TestListIndexes(t *testing.T) {
 	ts := pinecone_test.NewTestServer()
-	ts.RegisterHandler("/databases/", func(w http.ResponseWriter, _ *http.Request) {
+	ts.RegisterHandler("/databases", func(w http.ResponseWriter, _ *http.Request) {
 		resBytes, _ := json.Marshal([]string{
 			"index_1",
 			"index_2",
@@ -25,7 +25,7 @@ func TestListIndexes(t *testing.T) {
 	_, err := client.Databases().ListIndexes()
 	t.Helper()
 	if err != nil {
-		t.Error(err, "CreateFineTuningJob error")
+		t.Error(err, "ListIndexes error")
 		t.Fail()
 	}
 }
