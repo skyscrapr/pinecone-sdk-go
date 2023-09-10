@@ -1,7 +1,5 @@
 package pinecone
 
-import ()
-
 const DatabasesEndpointPath = "/databases/"
 
 type DatabasesEndpoint struct {
@@ -16,6 +14,19 @@ const (
 	IndexMetricDotProduct IndexMetric = "dotproduct"
 )
 
+func (im IndexMetric) String() string {
+	switch im {
+	case IndexMetricEuclidean:
+		return "euclidean"
+	case IndexMetricCosine:
+		return "cosine"
+	case IndexMetricDotProduct:
+		return "dotproduct"
+	default:
+		return ""
+	}
+}
+
 // Databases Endpoint
 func (c *Client) Databases() *DatabasesEndpoint {
 	return &DatabasesEndpoint{newEndpoint(c, DatabasesEndpointPath)}
@@ -27,13 +38,13 @@ type Index struct {
 }
 
 type Database struct {
-	Name      string `json:"name"`
-	Dimension int    `json:"dimension"`
-	Metric    string `json:"metric"`
-	Pods      int    `json:"pods"`
-	Replicas  int    `json:"replicas"`
-	PodType   string `json:"pod_type"`
-	Shards    int    `json:"shards"`
+	Name      string      `json:"name"`
+	Dimension int         `json:"dimension"`
+	Metric    IndexMetric `json:"metric"`
+	Pods      int         `json:"pods"`
+	Replicas  int         `json:"replicas"`
+	PodType   string      `json:"pod_type"`
+	Shards    int         `json:"shards"`
 }
 
 type Status struct {
@@ -64,10 +75,10 @@ func (e *DatabasesEndpoint) ListIndexes() ([]string, error) {
 type CreateIndexParams struct {
 	Name             string            `json:"name"`
 	Dimension        int               `json:"dimension"`
-	Metric           IndexMetric       `json:"metric,omitempty"`
-	Pods             *int              `json:"pods,omitempty"`
-	Replicas         *int              `json:"replicas,omitempty"`
-	PodType          *string           `json:"pod_type,omitempty"`
+	Metric           IndexMetric       `json:"metric"`
+	Pods             int               `json:"pods"`
+	Replicas         int               `json:"replicas"`
+	PodType          string            `json:"pod_type"`
 	MetadataConfig   map[string]string `json:"metadata_config,omitempty"`
 	SourceCollection *string           `json:"source_collection,omitempty"`
 }
