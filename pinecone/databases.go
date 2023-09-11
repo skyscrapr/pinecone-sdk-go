@@ -64,14 +64,6 @@ func (e *DatabasesEndpoint) ListIndexes() ([]string, error) {
 	return indexes, err
 }
 
-// name              string  required The name of the index to be created. The maximum length is 45 characters.
-// dimension         integer required The dimensions of the vectors to be inserted in the index
-// metric            string           The distance metric to be used for similarity search. You can use 'euclidean', 'cosine', or 'dotproduct'.
-// pods              integer          The number of pods for the index to use,including replicas.
-// replicas          integer          The number of replicas. Replicas duplicate your index. They provide higher availability and throughput.
-// pod_type          string           The type of pod to use. One of s1, p1, or p2 appended with . and one of x1, x2, x4, or x8.
-// metadata_config   object | null    Configuration for the behavior of Pinecone's internal metadata index. By default, all metadata is indexed; when metadata_config is present, only specified metadata fields are indexed. To specify metadata fields to index, provide a JSON object of the following form: {"indexed": ["example_metadata_field"]}
-// source_collection string           The name of the collection to create an index from
 type CreateIndexParams struct {
 	Name             string            `json:"name"`
 	Dimension        int               `json:"dimension"`
@@ -81,6 +73,12 @@ type CreateIndexParams struct {
 	PodType          string            `json:"pod_type"`
 	MetadataConfig   map[string]string `json:"metadata_config,omitempty"`
 	SourceCollection *string           `json:"source_collection,omitempty"`
+}
+
+type ConfigureIndexParams struct {
+	Name     string `json:"name"`
+	Replicas int    `json:"replicas"`
+	PodType  string `json:"pod_type"`
 }
 
 // CreateIndex creates a Pinecone index.
@@ -98,6 +96,15 @@ func (e *DatabasesEndpoint) DescribeIndex(name string) (*Index, error) {
 	var index Index
 	err := e.do(e, "GET", name, nil, nil, &index)
 	return &index, err
+}
+
+// ConfigureIndex specifies the pod type and number of replicas for an index.
+//   - Not supported by projects on the gcp-starter environment.
+//
+// API Reference: https://docs.pinecone.io/reference/configure_index
+func (e *DatabasesEndpoint) ConfigureIndex(params *ConfigureIndexParams) error {
+	err := e.do(e, "PATCH", "", params, nil, nil)
+	return err
 }
 
 // DeleteIndex deletes an existing index.
