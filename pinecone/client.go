@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -94,9 +93,5 @@ func decodeResponse(body io.Reader, v any) error {
 	if v == nil {
 		return nil
 	}
-	err := json.NewDecoder(body).Decode(v)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
+	return json.NewDecoder(body).Decode(v)
 }

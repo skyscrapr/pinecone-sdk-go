@@ -27,6 +27,33 @@ func (im IndexMetric) String() string {
 	}
 }
 
+type IndexState string
+
+const (
+	IndexStateInitializing IndexState = "Initializing"
+	IndexStateScalingUp    IndexState = "ScalingUp"
+	IndexStateScalingDown  IndexState = "ScalingDown"
+	IndexStateTerminating  IndexState = "Terminating"
+	IndexStateReady        IndexState = "Ready"
+)
+
+func (is IndexState) String() string {
+	switch is {
+	case IndexStateInitializing:
+		return "Initializing"
+	case IndexStateScalingUp:
+		return "ScalingUp"
+	case IndexStateScalingDown:
+		return "ScalingDown"
+	case IndexStateTerminating:
+		return "Terminating"
+	case IndexStateReady:
+		return "Ready"
+	default:
+		return ""
+	}
+}
+
 // Databases Endpoint
 func (c *Client) Databases() *DatabasesEndpoint {
 	return &DatabasesEndpoint{newEndpoint(c, DatabasesEndpointPath)}
@@ -37,23 +64,23 @@ type Index struct {
 	Status   Status   `json:"status"`
 }
 
+type MetadataConfig struct {
+	Indexed []string `json:"indexed"`
+}
+
 type Database struct {
-	Name      string      `json:"name"`
-	Dimension int         `json:"dimension"`
-	Metric    IndexMetric `json:"metric"`
-	Pods      int         `json:"pods"`
-	Replicas  int         `json:"replicas"`
-	PodType   string      `json:"pod_type"`
-	Shards    int         `json:"shards"`
+	Name           string          `json:"name"`
+	Dimension      int             `json:"dimension"`
+	Metric         IndexMetric     `json:"metric"`
+	Pods           int             `json:"pods"`
+	Replicas       int             `json:"replicas"`
+	PodType        string          `json:"pod_type"`
+	MetadataConfig *MetadataConfig `json:"metadata_config,omitempty"`
 }
 
 type Status struct {
-	Waiting []interface{} `json:"waiting"`
-	Crashed []interface{} `json:"crashed"`
-	Host    string        `json:"host"`
-	Port    int           `json:"port"`
-	State   string        `json:"state"`
-	Ready   bool          `json:"ready"`
+	State IndexState `json:"state"`
+	Ready bool       `json:"ready"`
 }
 
 // ListIndexes returns a list of your Pinecone indexes.
@@ -65,14 +92,14 @@ func (e *DatabasesEndpoint) ListIndexes() ([]string, error) {
 }
 
 type CreateIndexParams struct {
-	Name             string            `json:"name"`
-	Dimension        int               `json:"dimension"`
-	Metric           IndexMetric       `json:"metric"`
-	Pods             int               `json:"pods"`
-	Replicas         int               `json:"replicas"`
-	PodType          string            `json:"pod_type"`
-	MetadataConfig   map[string]string `json:"metadata_config,omitempty"`
-	SourceCollection *string           `json:"source_collection,omitempty"`
+	Name             string          `json:"name"`
+	Dimension        int             `json:"dimension"`
+	Metric           IndexMetric     `json:"metric"`
+	Pods             int             `json:"pods"`
+	Replicas         int             `json:"replicas"`
+	PodType          string          `json:"pod_type"`
+	MetadataConfig   *MetadataConfig `json:"metadata_config,omitempty"`
+	SourceCollection *string         `json:"source_collection,omitempty"`
 }
 
 type ConfigureIndexParams struct {
