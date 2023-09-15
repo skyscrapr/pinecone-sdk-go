@@ -64,14 +64,18 @@ type Index struct {
 	Status   Status   `json:"status"`
 }
 
+type MetadataConfig struct {
+	Indexed []string `json:"indexed"`
+}
+
 type Database struct {
-	Name           string            `json:"name"`
-	Dimension      int               `json:"dimension"`
-	Metric         IndexMetric       `json:"metric"`
-	Pods           int               `json:"pods"`
-	Replicas       int               `json:"replicas"`
-	PodType        string            `json:"pod_type"`
-	MetadataConfig map[string]string `json:"metadata_config,omitempty"`
+	Name           string          `json:"name"`
+	Dimension      int             `json:"dimension"`
+	Metric         IndexMetric     `json:"metric"`
+	Pods           int             `json:"pods"`
+	Replicas       int             `json:"replicas"`
+	PodType        string          `json:"pod_type"`
+	MetadataConfig *MetadataConfig `json:"metadata_config,omitempty"`
 }
 
 type Status struct {
@@ -88,14 +92,14 @@ func (e *DatabasesEndpoint) ListIndexes() ([]string, error) {
 }
 
 type CreateIndexParams struct {
-	Name             string            `json:"name"`
-	Dimension        int               `json:"dimension"`
-	Metric           IndexMetric       `json:"metric"`
-	Pods             int               `json:"pods"`
-	Replicas         int               `json:"replicas"`
-	PodType          string            `json:"pod_type"`
-	MetadataConfig   map[string]string `json:"metadata_config,omitempty"`
-	SourceCollection *string           `json:"source_collection,omitempty"`
+	Name             string          `json:"name"`
+	Dimension        int             `json:"dimension"`
+	Metric           IndexMetric     `json:"metric"`
+	Pods             int             `json:"pods"`
+	Replicas         int             `json:"replicas"`
+	PodType          string          `json:"pod_type"`
+	MetadataConfig   *MetadataConfig `json:"metadata_config,omitempty"`
+	SourceCollection *string         `json:"source_collection,omitempty"`
 }
 
 type ConfigureIndexParams struct {
