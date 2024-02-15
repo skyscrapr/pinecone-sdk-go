@@ -1,9 +1,18 @@
 package pinecone
 
-const DatabasesEndpointPath = "/databases/"
+const IndexesEndpointPath = "/indexes/"
 
-type DatabasesEndpoint struct {
+type IndexesEndpoint struct {
 	*endpoint
+}
+
+type Index struct {
+	Name      string      `json:"name"`
+	Dimension int         `json:"dimension"`
+	Metric    IndexMetric `json:"metric"`
+	Host      string      `json:"host"`
+	Status    IndexStatus `json:"status"`
+	Spec      IndexSpec   `json:"spec"`
 }
 
 type IndexMetric string
@@ -25,6 +34,11 @@ func (im IndexMetric) String() string {
 	default:
 		return ""
 	}
+}
+
+type IndexStatus struct {
+	State IndexState `json:"state"`
+	Ready bool       `json:"ready"`
 }
 
 type IndexState string
@@ -54,72 +68,66 @@ func (is IndexState) String() string {
 	}
 }
 
-// Databases Endpoint
-func (c *Client) Databases() *DatabasesEndpoint {
-	return &DatabasesEndpoint{newEndpoint(c, DatabasesEndpointPath)}
+type IndexSpec struct {
+	Serverless *IndexServerlessSpec `json:"serverless,omitempty"`
+	Pod        *IndexPodSpec        `json:"pod,omitempty"`
 }
 
-type Index struct {
-	Database Database `json:"database"`
-	Status   Status   `json:"status"`
+type IndexServerlessSpec struct {
+	Cloud  string `json:"cloud"`
+	Region string `json:"region"`
 }
 
-type MetadataConfig struct {
+type IndexPodSpec struct {
+	Environment    string              `json:"environment"`
+	Replicas       int                 `json:"replicas"`
+	Shards         int                 `json:"shards"`
+	PodType        string              `json:"pod_type"`
+	Pods           int                 `json:"pods"`
+	MetadataConfig IndexMetadataConfig `json:"metadata_config"`
+	SourceCollection string              `json:"source_collection"`
+}
+
+type IndexMetadataConfig struct {
 	Indexed []string `json:"indexed"`
 }
 
-type Database struct {
-	Name           string          `json:"name"`
-	Dimension      int             `json:"dimension"`
-	Metric         IndexMetric     `json:"metric"`
-	Pods           int             `json:"pods"`
-	Replicas       int             `json:"replicas"`
-	PodType        string          `json:"pod_type"`
-	MetadataConfig *MetadataConfig `json:"metadata_config,omitempty"`
-}
-
-type Status struct {
-	State IndexState `json:"state"`
-	Ready bool       `json:"ready"`
+// Databases Endpoint
+func (c *Client) Indexes() *IndexesEndpoint {
+	return &IndexesEndpoint{newEndpoint(c, IndexesEndpointPath)}
 }
 
 // ListIndexes returns a list of your Pinecone indexes.
 // API Reference: https://docs.pinecone.io/reference/list_indexes
-func (e *DatabasesEndpoint) ListIndexes() ([]string, error) {
-	var indexes []string
+func (e *IndexesEndpoint) ListIndexes() ([]Index, error) {
+	var indexes []Index
 	err := e.do(e, "GET", "", nil, nil, &indexes)
 	return indexes, err
 }
 
 type CreateIndexParams struct {
-	Name             string          `json:"name"`
-	Dimension        int             `json:"dimension"`
-	Metric           IndexMetric     `json:"metric"`
-	Pods             int             `json:"pods"`
-	Replicas         int             `json:"replicas"`
-	PodType          string          `json:"pod_type"`
-	MetadataConfig   *MetadataConfig `json:"metadata_config,omitempty"`
-	SourceCollection *string         `json:"source_collection,omitempty"`
+	Name      string      `json:"name"`
+	Dimension int         `json:"dimension"`
+	Metric    IndexMetric `json:"metric"`
+	Spec      IndexSpec   `json:"spec"`
 }
 
 type ConfigureIndexParams struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
-	PodType  string `json:"pod_type"`
+	Spec IndexSpec `json:"spec"`
 }
 
 // CreateIndex creates a Pinecone index.
 //   - You can use it to specify the measure of similarity, the dimension of vectors to be stored in the index, the numbers of replicas to use, and more.
 //
 // API Reference: https://docs.pinecone.io/reference/create_index
-func (e *DatabasesEndpoint) CreateIndex(params *CreateIndexParams) error {
+func (e *IndexesEndpoint) CreateIndex(params *CreateIndexParams) error {
 	err := e.do(e, "POST", "", params, nil, nil)
 	return err
 }
 
 // DescribeIndex gets description of an existing index.
 // API Reference: https://docs.pinecone.io/reference/describe_index
-func (e *DatabasesEndpoint) DescribeIndex(name string) (*Index, error) {
+func (e *IndexesEndpoint) DescribeIndex(name string) (*Index, error) {
 	var index Index
 	err := e.do(e, "GET", name, nil, nil, &index)
 	return &index, err
@@ -129,14 +137,14 @@ func (e *DatabasesEndpoint) DescribeIndex(name string) (*Index, error) {
 //   - Not supported by projects on the gcp-starter environment.
 //
 // API Reference: https://docs.pinecone.io/reference/configure_index
-func (e *DatabasesEndpoint) ConfigureIndex(params *ConfigureIndexParams) error {
-	err := e.do(e, "PATCH", "", params, nil, nil)
+func (e *IndexesEndpoint) ConfigureIndex(name string, params *ConfigureIndexParams) error {
+	err := e.do(e, "PATCH", name, params, nil, nil)
 	return err
 }
 
 // DeleteIndex deletes an existing index.
 // API Reference: https://docs.pinecone.io/reference/delete_index
-func (e *DatabasesEndpoint) DeleteIndex(name string) error {
+func (e *IndexesEndpoint) DeleteIndex(name string) error {
 	err := e.do(e, "DELETE", name, nil, nil, nil)
 	return err
 }

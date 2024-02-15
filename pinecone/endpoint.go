@@ -1,7 +1,6 @@
 package pinecone
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"path"
@@ -31,11 +30,7 @@ func (e *endpoint) buildURL(endpointPath string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-	sBaseUrl := e.BaseUrl
-	if e.Environment != "" {
-		sBaseUrl = fmt.Sprintf(apiTemplateUrl, e.Environment)
-	}
-	baseUrl, err := url.Parse(sBaseUrl)
+	baseUrl, err := url.Parse(e.BaseUrl)
 	if err != nil {
 		return nil, err
 	}

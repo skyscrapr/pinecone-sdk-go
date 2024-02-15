@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	apiTemplateUrl string = "https://controller.%s.pinecone.io"
+	apiTemplateUrl string = "https://api.pinecone.io"
 )
 
 // Client - Pinecone client.

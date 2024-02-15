@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/skyscrapr/pinecone-sdk-go/pinecone"
-	"github.com/skyscrapr/pinecone-sdk-go/pinecone/test"
+	pinecone_test "github.com/skyscrapr/pinecone-sdk-go/pinecone/test"
 )
 
 func TestListIndexes(t *testing.T) {
 	ts := pinecone_test.NewTestServer()
-	ts.RegisterHandler("/databases", func(w http.ResponseWriter, _ *http.Request) {
+	ts.RegisterHandler("/indexes", func(w http.ResponseWriter, _ *http.Request) {
 		resBytes, _ := json.Marshal([]string{
 			"index_1",
 			"index_2",
@@ -23,7 +23,7 @@ func TestListIndexes(t *testing.T) {
 	defer ts.HTTPServer.Close()
 
 	client := pinecone_test.NewTestClient(ts)
-	_, err := client.Databases().ListIndexes()
+	_, err := client.Indexes().ListIndexes()
 	t.Helper()
 	if err != nil {
 		t.Error(err, "ListIndexes error")
@@ -33,17 +33,19 @@ func TestListIndexes(t *testing.T) {
 
 func TestDescribeIndex(t *testing.T) {
 	ts := pinecone_test.NewTestServer()
-	ts.RegisterHandler("/databases/test_index", func(w http.ResponseWriter, _ *http.Request) {
+	ts.RegisterHandler("/indexes/test_index", func(w http.ResponseWriter, _ *http.Request) {
 		resBytes, _ := json.Marshal(pinecone.Index{
-			Database: pinecone.Database{
-				Name:      "test_index",
-				Dimension: 512,
-				Metric:    pinecone.IndexMetricCosine,
-				Pods:      1,
-				Replicas:  1,
-				PodType:   "starter",
+			Name:      "test_index",
+			Dimension: 512,
+			Metric:    pinecone.IndexMetricCosine,
+			Spec: pinecone.IndexSpec{
+				Pod: &pinecone.IndexPodSpec{
+					Environment: "us-west4-gcp",
+					Replicas:    1,
+					PodType:     "starter",
+				},
 			},
-			Status: pinecone.Status{
+			Status: pinecone.IndexStatus{
 				Ready: true,
 				State: "Ready",
 			},
@@ -54,7 +56,7 @@ func TestDescribeIndex(t *testing.T) {
 	defer ts.HTTPServer.Close()
 
 	client := pinecone_test.NewTestClient(ts)
-	_, err := client.Databases().DescribeIndex("test_index")
+	_, err := client.Indexes().DescribeIndex("test_index")
 	t.Helper()
 	if err != nil {
 		t.Error(err, "DescribeIndex error")
