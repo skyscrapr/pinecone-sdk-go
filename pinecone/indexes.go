@@ -79,13 +79,13 @@ type IndexServerlessSpec struct {
 }
 
 type IndexPodSpec struct {
-	Environment    string              `json:"environment"`
-	Replicas       int                 `json:"replicas"`
-	Shards         int                 `json:"shards"`
-	PodType        string              `json:"pod_type"`
-	Pods           int                 `json:"pods"`
-	MetadataConfig IndexMetadataConfig `json:"metadata_config"`
-	SourceCollection string              `json:"source_collection"`
+	Environment      string              `json:"environment"`
+	Replicas         int                 `json:"replicas"`
+	Shards           int                 `json:"shards"`
+	PodType          string              `json:"pod_type"`
+	Pods             int                 `json:"pods"`
+	MetadataConfig   IndexMetadataConfig `json:"metadata_config"`
+	SourceCollection string              `json:"source_collection,omitempty"`
 }
 
 type IndexMetadataConfig struct {

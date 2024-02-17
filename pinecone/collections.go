@@ -12,9 +12,12 @@ func (c *Client) Collections() *CollectionsEndpoint {
 }
 
 type Collection struct {
-	Name   string `json:"name"`
-	Size   int    `json:"size"`
-	Status string `json:"status"`
+	Name        string `json:"name"`
+	Size        int    `json:"size"`
+	Status      string `json:"status"`
+	Dimension   int    `json:"dimension"`
+	VectorCount int    `json:"vector_count"`
+	Environment string `json:"environment"`
 }
 
 // ListCollections returns a list of your Pinecone collections.
