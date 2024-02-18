@@ -6,6 +6,10 @@ type IndexesEndpoint struct {
 	*endpoint
 }
 
+type Indexes struct {
+	Indexes []Index `json:"indexes"`
+}
+
 type Index struct {
 	Name      string      `json:"name"`
 	Dimension int         `json:"dimension"`
@@ -92,17 +96,17 @@ type IndexMetadataConfig struct {
 	Indexed []string `json:"indexed"`
 }
 
-// Databases Endpoint
+// Indexes Endpoint
 func (c *Client) Indexes() *IndexesEndpoint {
 	return &IndexesEndpoint{newEndpoint(c, IndexesEndpointPath)}
 }
 
 // ListIndexes returns a list of your Pinecone indexes.
 // API Reference: https://docs.pinecone.io/reference/list_indexes
-func (e *IndexesEndpoint) ListIndexes() ([]Index, error) {
-	var indexes []Index
+func (e *IndexesEndpoint) ListIndexes() (*Indexes, error) {
+	var indexes Indexes
 	err := e.do(e, "GET", "", nil, nil, &indexes)
-	return indexes, err
+	return &indexes, err
 }
 
 type CreateIndexParams struct {
