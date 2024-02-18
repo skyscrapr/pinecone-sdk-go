@@ -11,6 +11,10 @@ func (c *Client) Collections() *CollectionsEndpoint {
 	return &CollectionsEndpoint{newEndpoint(c, CollectionsEndpointPath)}
 }
 
+type Collections struct {
+	Collections []Collection `json:"colllections"`
+}
+
 type Collection struct {
 	Name        string `json:"name"`
 	Size        int    `json:"size"`
@@ -22,10 +26,10 @@ type Collection struct {
 
 // ListCollections returns a list of your Pinecone collections.
 // API Reference: https://docs.pinecone.io/reference/list_collections
-func (e *CollectionsEndpoint) ListCollections() ([]string, error) {
-	var collections []string
+func (e *CollectionsEndpoint) ListCollections() (*Collections, error) {
+	var collections Collections
 	err := e.do(e, "GET", "", nil, nil, &collections)
-	return collections, err
+	return &collections, err
 }
 
 type CreateCollectionParams struct {
